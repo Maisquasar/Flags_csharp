@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TarGetFramework>net5.0</TarGetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Raylib-cs" Version="3.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="assets\Ui\" />
+  </ItemGroup>
+
+</Project>
