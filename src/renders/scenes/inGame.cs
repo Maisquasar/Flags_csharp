@@ -21,7 +21,7 @@ namespace Flags_csharp.src.renders.scenes
 
     enum GameMode2
     {
-        NONE2,
+        NONE,
         ALL,
         AFRIQUE,
         EUROPE,
@@ -33,7 +33,7 @@ namespace Flags_csharp.src.renders.scenes
     class InGame : Scene
     {
         GameMode mMode = GameMode.NONE;
-        GameMode2 mMode2 = GameMode2.NONE2;
+        GameMode2 mMode2 = GameMode2.NONE;
         int mRandomId;
         bool mWin = false;
         bool isDeclared = false;                // True if a country is taken.
@@ -41,11 +41,13 @@ namespace Flags_csharp.src.renders.scenes
         public InGame() { }
         public InGame(Ressource ressources)
         {
-            texts["Title"] = new Text("The World Quiz", new Vector2((GetScreenWidth() / 2) - (MeasureText("The World Quiz", 100)) / 2, 100), 100, Color.ORANGE);
-            sprites["background"] = new Sprite(true, new Vector2(), new Vector2(GetScreenWidth(), GetScreenHeight()), GRAY);
-            sprites["background"].SetTexture(ressources.UITextures["background"]);
+            var background = new Sprite(true, new Vector2(), new Vector2(GetScreenWidth(), GetScreenHeight()), GRAY);
+            background.Texture = ressources.UITextures["background"];
+            UiComponents["background"] = background;
+
+            UiComponents["Title"] = new Text("The World Quiz", new Vector2((GetScreenWidth() / 2) - (MeasureText("The World Quiz", 100)) / 2, 100), 100, Color.ORANGE);
             // Initialize every country in each category.
-            for (int i = 0; i < 197; i++)
+            for (int i = 0; i < CountriesDatas.countriesDatas.Count; i++)
             {
                 countries.Add(new Country(i));
                 if (countries[i].GetContinent() == "Afrique") { countriesAfrique.Add(countries[i]); }
@@ -54,113 +56,121 @@ namespace Flags_csharp.src.renders.scenes
                 if (countries[i].GetContinent() == "Oceanie") { countriesOceanie.Add(countries[i]); }
                 if (countries[i].GetContinent() == "Amerique") { countriesAmerique.Add(countries[i]); }
             }
-            buttons["Pause"] = new Button(false, new Vector2(100, 100), new Vector2(50, 50), 0.05f, SKYBLUE, SKYBLUE);
+            UiComponents["Pause"] = new Button(false, new Vector2(100, 100), new Vector2(50, 50), 0.05f, SKYBLUE, SKYBLUE);
 
             // GameMode Buttons.
-            textButtons["Capitale"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 - 250), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Find capitale\n by country", BLACK, 35);
-            textButtons["Map"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 - 0), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Find country\n by map", BLACK, 35);
-            textButtons["Flag"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 + 250), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Find country\n by Flag", BLACK, 35);
-            buttons["back"] = new Button(true, new Vector2(100, GetScreenHeight() - 100), new Vector2(50, 50), 0, BLUE, BLUE);
+            UiComponents["Capitale"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 - 250), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Find capitale\n by country", BLACK, 35);
+            UiComponents["Map"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 - 0), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Find country\n by map", BLACK, 35);
+            UiComponents["Flag"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 + 250), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Find country\n by Flag", BLACK, 35);
+            UiComponents["back"] = new Button(true, new Vector2(100, GetScreenHeight() - 100), new Vector2(50, 50), 0, BLUE, BLUE);
 
             // GameMode 2 Buttons.
-            textButtons["All"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 - 250), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "All continent", BLACK, 35);
-            textButtons["Afrique"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 - 125), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Afrique", BLACK, 35);
-            textButtons["Europe"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Europe", BLACK, 35);
-            textButtons["Asie"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 + 125), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Asie", BLACK, 35);
-            textButtons["Oceanie"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 + 250), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Oceanie", BLACK, 35);
-            textButtons["Amerique"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 + 375), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Amerique", BLACK, 35);
-            foreach (var i in textButtons)
-                i.Value.SetVisibility(false);
-            // Show Buttons for GameMode.
-            textButtons["Capitale"].SetVisibility(true);
-            textButtons["Map"].SetVisibility(true);
-            textButtons["Flag"].SetVisibility(true);
+            UiComponents["All"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 - 250), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "All continent", BLACK, 35);
+            UiComponents.Values.Last().Visible = false;
+            UiComponents["Afrique"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 - 125), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Afrique", BLACK, 35);
+            UiComponents.Values.Last().Visible = false;
+            UiComponents["Europe"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Europe", BLACK, 35);
+            UiComponents.Values.Last().Visible = false;
+            UiComponents["Asie"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 + 125), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Asie", BLACK, 35);
+            UiComponents.Values.Last().Visible = false;
+            UiComponents["Oceanie"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 + 250), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Oceanie", BLACK, 35);
+            UiComponents.Values.Last().Visible = false;
+            UiComponents["Amerique"] = new TextButton(new Vector2(GetScreenWidth() / 2 - 150, GetScreenHeight() / 2 + 375), new Vector2(300, 100), SKYBLUE, new Vector2(50, 5), "Amerique", BLACK, 35);
+            UiComponents.Values.Last().Visible = false;
 
             // Inputbox.
-            inputboxs["input"] = new InputBox(new Vector2(GetScreenWidth() / 2 - 450, GetScreenWidth() / 2 - 100), new Vector2(900, 100), 34, SKYBLUE, new Vector2(20, 10), 50);
-            inputboxs["input"].SetVisibility(false);
+            var input = new InputBox(new Vector2(GetScreenWidth() / 2 - 450, GetScreenWidth() / 2 - 100), new Vector2(900, 100), 34, SKYBLUE, new Vector2(20, 10), 50);
+            input.Visible = false;
+            UiComponents["input"] = input;
 
             // Texts.
-            texts["Find"] = new Text("", new Vector2(GetScreenWidth() / 2 - 450, GetScreenWidth() / 2 - 175), 50, WHITE);
-            texts["Country"] = new Text("", new Vector2(GetScreenWidth() / 2 - 500, 250), 50, BLACK);
-            texts["Answer"] = new Text("", new Vector2(10, GetScreenHeight() - 200), 50, BLACK);
-            texts["AnswerStatus"] = new Text("", new Vector2(GetScreenWidth() / 2 + 100, 800), 50, GREEN);
-            texts["NumberOfCountries"] = new Text("", new Vector2(GetScreenWidth() - 300, GetScreenHeight() - 200), 30, YELLOW);
-            sprites["Flag"] = new Sprite(true, new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2 - 200), new Vector2(), WHITE);
-            sprites["Map"] = new Sprite(true, new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2 - 200), new Vector2(), WHITE);
+            UiComponents["Find"] = new Text("", new Vector2(GetScreenWidth() / 2 - 450, GetScreenWidth() / 2 - 175), 50, WHITE);
+            UiComponents["Country"] = new Text("", new Vector2(GetScreenWidth() / 2 - 500, 250), 50, BLACK);
+            UiComponents["AnswerText"] = new Text("", new Vector2(10, GetScreenHeight() - 200), 50, BLACK);
+            UiComponents["AnswerStatus"] = new Text("", new Vector2(GetScreenWidth() / 2 + 100, 800), 50, GREEN);
+            UiComponents["NumberOfCountries"] = new Text("", new Vector2(GetScreenWidth() - 300, GetScreenHeight() - 200), 30, YELLOW);
+            UiComponents["FlagSprite"] = new Sprite(true, new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2 - 200), new Vector2(), WHITE);
+            UiComponents["MapSprite"] = new Sprite(true, new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2 - 200), new Vector2(), WHITE);
 
             // Answer Button.
-            toggleButtons["Answer"] = new ToggleButton(new Button(true, new Vector2(200, GetScreenHeight() - 100), new Vector2(50, 50), 0, SKYBLUE, PINK), false);
+            UiComponents["Answer"] = new ToggleButton(new Button(true, new Vector2(200, GetScreenHeight() - 100), new Vector2(50, 50), 0, SKYBLUE, PINK), false);
+
+            foreach (var i in UiComponents) { Console.WriteLine($"{ i.Key} : {i.Value.ToString()}"); }
         }
         ~InGame() { }
+
+        void SetGameMode1(GameMode mode)
+        {
+            mMode = mode;
+            if (mode != GameMode.NONE)
+            {
+                UiComponents["Capitale"].Visible = false;
+                UiComponents["Map"].Visible = false;
+                UiComponents["Flag"].Visible = false;
+
+                UiComponents["All"].Visible = true;
+                UiComponents["Afrique"].Visible = true;
+                UiComponents["Europe"].Visible = true;
+                UiComponents["Asie"].Visible = true;
+                UiComponents["Oceanie"].Visible = true;
+                UiComponents["Amerique"].Visible = true;
+            }
+            else
+            {
+                UiComponents["Capitale"].Visible = true;
+                UiComponents["Map"].Visible = true;
+                UiComponents["Flag"].Visible = true;
+
+                UiComponents["All"].Visible = false;
+                UiComponents["Afrique"].Visible = false;
+                UiComponents["Europe"].Visible = false;
+                UiComponents["Asie"].Visible = false;
+                UiComponents["Oceanie"].Visible = false;
+                UiComponents["Amerique"].Visible = false;
+            }
+        }
+
+        void SetGameMode2(GameMode2 mode)
+        {
+            mMode2 = mode;
+
+            UiComponents["All"].Visible = false;
+            UiComponents["Afrique"].Visible = false;
+            UiComponents["Europe"].Visible = false;
+            UiComponents["Asie"].Visible = false;
+            UiComponents["Oceanie"].Visible = false;
+            UiComponents["Amerique"].Visible = false;
+
+            UiComponents["input"].Visible = true;
+            UiComponents["Pause"].Visible = true;
+            UiComponents["Title"].Visible = true;
+        }
+
         public new void Update()
         {
             // Update Ui.
-            foreach (var i in toggleButtons) { i.Value.Update(); }
-            foreach (var i in textButtons) { i.Value.Update(); }
-            foreach (var i in inputboxs) { i.Value.Update(); }
-            foreach (var i in buttons) { i.Value.Update(); }
+            foreach (var i in UiComponents) { i.Value.Update(); }
             if (mMode == GameMode.NONE)
             {
                 // Update GameMode Buttons.
-                if (textButtons["Capitale"].IsClicked()) { mMode = GameMode.CAPITALE; }
-                else if (textButtons["Map"].IsClicked()) { mMode = GameMode.MAP; }
-                else if (textButtons["Flag"].IsClicked()) { mMode = GameMode.FLAGS; }
-
-                // Check for all buttons if clicked, if true Set visible all buttons except GameMode buttons.
-                foreach (var i in textButtons)
-                {
-                    if (i.Value.IsClicked())
-                    {
-                        foreach (var j in textButtons) { j.Value.SetVisibility(true); }
-
-                        textButtons["Capitale"].SetVisibility(false);
-                        textButtons["Map"].SetVisibility(false);
-                        textButtons["Flag"].SetVisibility(false);
-                    }
-                }
+                if (UiComponents["Capitale"].IsClicked()) { SetGameMode1(GameMode.CAPITALE); }
+                else if (UiComponents["Map"].IsClicked()) { SetGameMode1(GameMode.MAP); }
+                else if (UiComponents["Flag"].IsClicked()) { SetGameMode1(GameMode.FLAGS); }
             }
-            else if (mMode2 == GameMode2.NONE2)
+            else if (mMode2 == GameMode2.NONE)
             {
                 // Update GameMode2 Buttons.
-                if (textButtons["All"].IsClicked()) { mMode2 = GameMode2.ALL; }
-                else if (textButtons["Afrique"].IsClicked()) { mMode2 = GameMode2.AFRIQUE; }
-                else if (textButtons["Europe"].IsClicked()) { mMode2 = GameMode2.EUROPE; }
-                else if (textButtons["Asie"].IsClicked()) { mMode2 = GameMode2.ASIE; }
-                else if (textButtons["Oceanie"].IsClicked()) { mMode2 = GameMode2.OCEANIE; }
-                else if (textButtons["Amerique"].IsClicked()) { mMode2 = GameMode2.AMERIQUE; }
-                else if (buttons["back"].IsClicked()) { mMode = GameMode.NONE; }
-
-                // Check for all text buttons if clicked, if true Set visible all text buttons & buttons.
-                foreach (var i in textButtons)
-                {
-                    if (i.Value.IsClicked())
-                    {
-                        foreach (var j in textButtons)
-                            j.Value.SetVisibility(false);
-                        foreach (var j in buttons)
-                            j.Value.SetVisibility(false);
-                    }
-                }
-
-                // Check if buttons back is clicked.
-                foreach (var i in buttons)
-                {
-                    if (i.Value.IsClicked())
-                    {
-                        foreach (var j in textButtons)
-                            j.Value.SetVisibility(false);
-                        textButtons["Capitale"].SetVisibility(true);
-                        textButtons["Map"].SetVisibility(true);
-                        textButtons["Flag"].SetVisibility(true);
-                    }
-                }
+                if (UiComponents["All"].IsClicked()) { SetGameMode2(GameMode2.ALL); }
+                else if (UiComponents["Afrique"].IsClicked()) { SetGameMode2(GameMode2.AFRIQUE); }
+                else if (UiComponents["Europe"].IsClicked()) { SetGameMode2(GameMode2.EUROPE); }
+                else if (UiComponents["Asie"].IsClicked()) { SetGameMode2(GameMode2.ASIE); }
+                else if (UiComponents["Oceanie"].IsClicked()) { SetGameMode2(GameMode2.OCEANIE); }
+                else if (UiComponents["Amerique"].IsClicked()) { SetGameMode2(GameMode2.AMERIQUE); }
+                else if (UiComponents["back"].IsClicked()) { SetGameMode1(GameMode.NONE); }
             }
             // If GameMode choose.
             else
             {
-                buttons["Pause"].SetVisibility(true);
-                inputboxs["input"].SetVisibility(true);
                 // Get random Country for each GameModes (if is not declared).
                 if (!isDeclared)
                 {
@@ -192,30 +202,20 @@ namespace Flags_csharp.src.renders.scenes
         }
         public new void Draw()
         {
-            sprites["background"].Draw();
-            foreach (var i in texts) { if (i.Value.GetTextVisibility()) i.Value.Draw(); }
-            if (mMode != GameMode.NONE && mMode2 != GameMode2.NONE2)
+            foreach (var i in UiComponents)
             {
-                // Draw Ui When a GameMode is Choosen.
-                foreach (var i in inputboxs) { if (i.Value.GetVisibility()) i.Value.Draw(); }
-                foreach (var i in toggleButtons) { if (i.Value.GetVisibility()) i.Value.Draw(); }
-                foreach (var i in texts) { if (i.Value.GetTextVisibility()) i.Value.Draw(); }
-                foreach (var i in sprites) { if (i.Value.GetVisibility() && i.Key != "background") i.Value.Draw(); }
-                texts["Title"].SetTextVisibility(false);
+                i.Value.Draw();
+            }
+            if (mMode != GameMode.NONE && mMode2 != GameMode2.NONE)
+            {
+                UiComponents["Title"].Visible = (false);
             }
             else
             {
-                texts["Title"].SetTextVisibility(true);
+                UiComponents["Title"].Visible = (true);
             }
-            // Draw Buttons if visible.
-            foreach (var i in textButtons) { if (i.Value.GetVisibility()) i.Value.Draw(); }
-            foreach (var i in buttons) { if (i.Value.GetVisibility()) i.Value.Draw(); }
-
-            // Draw rectangle around textButtons.
-            foreach (var i in textButtons)
-                if (i.Value.GetVisibility())
-                    DrawRectangleLinesEx(new Rectangle((float)i.Value.GetPos().X, (float)i.Value.GetPos().Y, (float)i.Value.GetSize().X, (float)i.Value.GetSize().Y), 5, BLUE);
         }
+
         public bool IsValid(string text1, string text2, int ratio)
         {
             int good = 0;
@@ -249,28 +249,29 @@ namespace Flags_csharp.src.renders.scenes
                         {
                             countries[mRandomId].SetMap(LoadTexture($"assets/maps/{countries[mRandomId].GetIso()}.png"));
                             isLoaded = true;
-                            sprites["Map"].SetTexture(countries[mRandomId].GetMap().Last());
-                            if (sprites["Map"].GetTexture().height > 700)
+                            var Map = (UiComponents["MapSprite"] as Sprite);
+                            Map.Texture = (countries[mRandomId].GetMap().Last());
+                            if (Map.Texture.height > 700)
                             {
-                                sprites["Map"].SetSize(new Vector2(500, 300));
-                                sprites["Map"].SetPos(new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2));
+                                Map.Size = (new Vector2(500, 300));
+                                Map.Position = (new Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2));
                             }
                             else
                             {
-                                sprites["Map"].SetSize(new Vector2(countries[mRandomId].GetMap()[0].width, countries[mRandomId].GetMap()[0].height));
-                                sprites["Map"].SetOrigin(new Vector2(sprites["Map"].GetTexture().width / 2, sprites["Map"].GetTexture().height / 2));
+                                Map.Size = (new Vector2(countries[mRandomId].GetMap()[0].width, countries[mRandomId].GetMap()[0].height));
+                                Map.Origin = (new Vector2(Map.Texture.width / 2, Map.Texture.height / 2));
                             }
-                            sprites["Map"].SetOrigin(new Vector2(sprites["Map"].GetTexture().width / 2, sprites["Map"].GetTexture().height / 2));
-                            sprites["Map"].SetVisibility(true);
+                            Map.Origin = (new Vector2(Map.Texture.width / 2, Map.Texture.height / 2));
+                            Map.Visible = true;
                         }
-                        texts["Find"].SetText("Find Country :");
-                        texts["Answer"].SetText($"{countries[mRandomId].GetCountryName()}");
+                        (UiComponents["Find"] as Text).Content = ("Find Country :");
+                        (UiComponents["AnswerText"] as Text).Content = ($"{countries[mRandomId].GetCountryName()}");
                     }
                     break;
                 case GameMode.CAPITALE:
                     {
-                        texts["Country"].SetText($"Country : {countries[mRandomId].GetCountryName()}");
-                        texts["Answer"].SetText($"{countries[mRandomId].GetCapitale()}");
+                        (UiComponents["Country"] as Text).Content = ($"Country : {countries[mRandomId].GetCountryName()}");
+                        (UiComponents["AnswerText"] as Text).Content = ($"{countries[mRandomId].GetCapitale()}");
                     }
                     break;
                 case GameMode.FLAGS:
@@ -279,13 +280,14 @@ namespace Flags_csharp.src.renders.scenes
                         {
                             countries[mRandomId].SetFlag(LoadTexture($"assets/flags/{countries[mRandomId].GetIso()}.png"));
                             isLoaded = true;
-                            sprites["Flag"].SetTexture(countries[mRandomId].GetFlag()[0]);
-                            sprites["Flag"].SetSize(new Vector2(countries[mRandomId].GetFlag()[0].width / 4, countries[mRandomId].GetFlag()[0].height / 4));
-                            sprites["Flag"].SetVisibility(true);
-                            sprites["Flag"].SetOrigin(new Vector2((countries[mRandomId].GetFlag()[0].width / 4) / 2, (countries[mRandomId].GetFlag()[0].height / 4) / 2));
+                            var flag = (Sprite)UiComponents["FlagSprite"];
+                            flag.Texture = (countries[mRandomId].GetFlag()[0]);
+                            flag.Size = (new Vector2(countries[mRandomId].GetFlag()[0].width / 4, countries[mRandomId].GetFlag()[0].height / 4));
+                            flag.Visible = true;
+                            flag.Origin = (new Vector2((countries[mRandomId].GetFlag()[0].width / 4) / 2, (countries[mRandomId].GetFlag()[0].height / 4) / 2));
                         }
-                        texts["Find"].SetText("Find Country :");
-                        texts["Answer"].SetText($"{countries[mRandomId].GetCountryName()}");
+                        (UiComponents["Find"] as Text).Content = ("Find Country :");
+                        (UiComponents["AnswerText"] as Text).Content = ($"{countries[mRandomId].GetCountryName()}");
                     }
                     break;
                 default:
@@ -293,14 +295,14 @@ namespace Flags_csharp.src.renders.scenes
             }
             if (IsKeyReleased(KeyboardKey.KEY_ENTER))
             {
-                inputboxs["input"].SetClicked(true);
-                texts["AnswerStatus"].SetTextVisibility(true);
+                (UiComponents["input"] as InputBox).SetClicked(true);
+                (UiComponents["AnswerStatus"] as Text).TextVisibility = (true);
                 frameCount = 60;
                 // If 75% of the characters are good then it's valid.
-                if (IsValid(inputboxs["input"].GetText(), countries[mRandomId].GetCountryName(), 75) && frameCount > 0)
+                if (IsValid((UiComponents["input"] as InputBox).GetText(), countries[mRandomId].GetCountryName(), 75) && frameCount > 0)
                 {
-                    texts["AnswerStatus"].SetText("Good result");
-                    texts["AnswerStatus"].SetTextColor(GREEN);
+                    (UiComponents["AnswerStatus"] as Text).Content = "Good result";
+                    (UiComponents["AnswerStatus"] as Text).TextColor = (GREEN);
                     countries.Remove(countries[mRandomId]);
                     isDeclared = false;
                     isLoaded = false;
@@ -309,21 +311,21 @@ namespace Flags_csharp.src.renders.scenes
                 //Wrong result
                 else
                 {
-                    texts["AnswerStatus"].SetText("Wrong result");
-                    texts["AnswerStatus"].SetTextColor(RED);
+                    (UiComponents["AnswerStatus"] as Text).Content = "Wrong result";
+                    (UiComponents["AnswerStatus"] as Text).TextColor = (RED);
                 }
 
-                inputboxs["input"].ClearInput();
+                (UiComponents["input"] as InputBox).ClearInput();
             }
 
             // Number of Countries Text.
-            texts["NumberOfCountries"].SetText($"{mPoints}/{size_at_start}");
+            (UiComponents["NumberOfCountries"] as Text).Content = $"{mPoints}/{size_at_start}";
 
             // Answer Button.
-            if (toggleButtons["Answer"].IsOn())
-                texts["Answer"].SetTextVisibility(true);
+            if ((UiComponents["Answer"] as ToggleButton).IsToggle())
+                (UiComponents["AnswerText"] as Text).TextVisibility = (true);
             else
-                texts["Answer"].SetTextVisibility(false);
+                (UiComponents["AnswerText"] as Text).TextVisibility = (false);
 
             // Check if all was found, if true win.
             if (countries.Count() <= 0)
@@ -337,7 +339,7 @@ namespace Flags_csharp.src.renders.scenes
             // Set Visibility to false when time is elapsed.
             if (frameCount <= 0)
             {
-                texts["AnswerStatus"].SetTextVisibility(false);
+                (UiComponents["AnswerStatus"] as Text).TextVisibility = (false);
                 frameCount = 0;
             }
 

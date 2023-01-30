@@ -27,9 +27,6 @@ namespace Flags_csharp.src.renders
         public SceneManager()
         {
             mainMenu = new MainMenu(ressource);
-            inGame = new InGame(ressource);
-            pauseMenu = new Pause(ressource);
-            SettingsMenu = new Settings(ressource);
         }
         ~SceneManager() { }
         public void SwitchTo(SceneTypes type) 
@@ -46,36 +43,36 @@ namespace Flags_csharp.src.renders
             {
                 case SceneTypes.MAIN_MENU:
                     mainMenu.Update();
-                    if (mainMenu.texturedButtons["play"].IsClicked())
+                    if (mainMenu.UiComponents["play"].IsClicked())
                         SwitchTo(SceneTypes.IN_GAME);
-                    if (mainMenu.texturedButtons["settings"].IsClicked())
+                    if (mainMenu.UiComponents["settings"].IsClicked())
                         SwitchTo(SceneTypes.SETTINGS_MENU);
-                    if (mainMenu.texturedButtons["quit"].IsClicked())
+                    if (mainMenu.UiComponents["quit"].IsClicked())
                         System.Environment.Exit(0);
                     break;
 
                 case SceneTypes.IN_GAME:
                     inGame.Update();
-                    if (inGame.Win() || (inGame.GetGameMode() == GameMode.NONE && inGame.buttons["back"].IsClicked()))
+                    if (inGame.Win() || (inGame.GetGameMode() == GameMode.NONE && inGame.UiComponents["back"].IsClicked()))
                     {
                         SwitchTo(SceneTypes.MAIN_MENU);
                         inGame = new InGame(ressource);
                     }
-                    if (inGame.buttons["Pause"].IsClicked())
+                    if (inGame.UiComponents["Pause"].IsClicked())
                         SwitchTo(SceneTypes.PAUSE_MENU);
                     break;
 
                 case SceneTypes.SETTINGS_MENU:
                     SettingsMenu.Update();
-                    if (SettingsMenu.buttons["mainMenu"].IsClicked() && SettingsMenu.buttons["mainMenu"].GetVisibility())
+                    if (SettingsMenu.UiComponents["mainMenu"].IsClicked() && SettingsMenu.UiComponents["mainMenu"].Visible)
                         SwitchTo(SceneTypes.MAIN_MENU);
                     break;
 
                 case SceneTypes.PAUSE_MENU:
                     pauseMenu.Update();
-                    if (pauseMenu.textButtons["Reprendre"].IsClicked())
+                    if (pauseMenu.UiComponents["Reprendre"].IsClicked())
                         mType = SceneTypes.IN_GAME;
-                    if (pauseMenu.textButtons["Quitter"].IsClicked())
+                    if (pauseMenu.UiComponents["Quitter"].IsClicked())
                         SwitchTo(SceneTypes.MAIN_MENU);
                     break;
                 default:

@@ -10,10 +10,11 @@ namespace Flags_csharp
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            const int screenHeight = 1080;
+            SetConfigFlags(ConfigFlags.FLAG_WINDOW_RESIZABLE);
             const int screenWeight = 1920;
+            const int screenHeight = 1080;
 
             InitWindow(screenWeight, screenHeight, "Flags");
             InitAudioDevice();

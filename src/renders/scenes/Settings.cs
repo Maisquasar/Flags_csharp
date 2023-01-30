@@ -16,10 +16,11 @@ namespace Flags_csharp.src.renders.scenes
     {
         bool mButtonIsClicked;
         Country mCountry;
-
+        
         public Settings() { }
         public Settings(Ressource ressources)
         {
+            /*
             sprites["background"] = new Sprite(true, new Vector2(), new Vector2(GetScreenWidth(), GetScreenHeight()), GRAY);
             sprites["background"].SetTexture(ressources.UITextures["background"]);
             buttons["mainMenu"] = new Button(true, new Vector2(100, GetScreenHeight() - 100), new Vector2(50, 50), 0.05f, BLUE, BLUE);
@@ -172,6 +173,8 @@ namespace Flags_csharp.src.renders.scenes
                 }
             }
             sTime--;
+            */
         }
+        
     }
 }

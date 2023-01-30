@@ -14,6 +14,7 @@ namespace Flags_csharp.src.renders.scenes
     {
         public Pause(Ressource ressources)
         {
+            /*
             sprites["background"] = new Sprite(true, new Vector2(), new Vector2(GetScreenWidth(), GetScreenHeight()), GRAY);
             sprites["background"].SetTexture(ressources.UITextures["background"]);
             textButtons = new Dictionary<string, TextButton>();
@@ -39,6 +40,7 @@ namespace Flags_csharp.src.renders.scenes
              foreach (var i in buttons) { if (i.Value.GetVisibility()) i.Value.Update(); }
              foreach (var i in toggleButtons) { if (i.Value.GetVisibility()) i.Value.Update(); }
              foreach (var i in inputboxs) { if (i.Value.GetVisibility()) i.Value.Update(); }
+            */
         }
     };
 }

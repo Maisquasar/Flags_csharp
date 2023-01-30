@@ -10,15 +10,23 @@ using Raylib_cs;
 
 namespace Flags_csharp.src.renders
 {
+    class UIComponent
+    {
+        public virtual void Draw() { }
+        public virtual void Update() { }
+        public virtual bool IsClicked() { return false; }
+        public virtual bool IsMouseOn() { return false; }
+        public virtual bool Visible { get { return false; } set { } }
+    }
     // --------Sprite-------- //
-    class Sprite
+    class Sprite : UIComponent
     {
         protected Vector2 mPos;
         protected Vector2 mSize;
         protected Vector2 mOrigin;
-        protected Color mColor;
-        protected bool mShown;
-        protected List<Texture2D> mTexture = new List<Texture2D>();
+        protected Texture2D mTexture = new Texture2D();
+        protected Color mColor = WHITE;
+        protected bool mShown = true;
 
         public Sprite() { }
         public Sprite(bool shown, Vector2 pos, Vector2 size, Color color, Vector2 origin = new Vector2())
@@ -30,28 +38,23 @@ namespace Flags_csharp.src.renders
             mOrigin = origin;
         }
         ~Sprite() { }
-        public void Draw()
+        public override void Draw()
         {
-
-            if ((int)mTexture.Count() <= 0)
+            if (!Visible)
+                return;
+            if (mTexture.id == 0)
                 DrawRectanglePro(new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y), new Vector2((float)mOrigin.X, (float)mOrigin.Y), 0, mColor);
             else
-                DrawTexturePro(mTexture[0], new Rectangle(0, 0, (float)mTexture[0].width, (float)mTexture[0].height), new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y), new Vector2((float)mOrigin.X, (float)mOrigin.Y), 0, mColor);
+                DrawTexturePro(mTexture, new Rectangle(0, 0, (float)mTexture.width, (float)mTexture.height), new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y), new Vector2((float)mOrigin.X, (float)mOrigin.Y), 0, mColor);
         }
-        // ----------------------------- Setters ------------------------------ //
-        public void SetPos(Vector2 pos) { mPos = pos; }                         //
-        public void SetSize(Vector2 size) { mSize = size; }                     //
-        public void SetColor(Color color) { mColor = color; }                   //
-        public void SetVisibility(bool shown) { mShown = shown; }               //
-        public void SetTexture(Texture2D texture) { mTexture.Clear(); mTexture.Add(texture); }    //
-        public void SetOrigin(Vector2 origin) { mOrigin = origin; }             //
-        // ----------------------------- Getters ------------------------------ //
-        public Vector2 GetPos() { return mPos; }                                //
-        public Vector2 GetSize() { return mSize; }                              //
-        public Color GetColor() { return mColor; }                              //
-        public bool GetVisibility() { return mShown; }                          //
-        public Texture2D GetTexture() { return mTexture[0]; }                   //
-        // -------------------------------------------------------------------- //
+
+        // ----------------------------- Setters / Getters ------------------------------ //
+        public Vector2 Position { get { return mPos; } set { mPos = value; } }
+        public Vector2 Size { get { return mSize; } set { mSize = value; } }
+        public Vector2 Origin { get { return mOrigin; } set { mOrigin = value; } }
+        public Texture2D Texture { get { return mTexture; } set { mTexture = value; } }
+        public Color Color { get { return mColor; } set { mColor = value; } }
+        public override bool Visible { get { return mShown; } set { mShown = value; } }
     };
 
     enum ButtonType
@@ -66,9 +69,11 @@ namespace Flags_csharp.src.renders
     {
         ButtonType mType;
         string mText;
-        bool isOn;
+        bool mToggled;
         Vector2 mTextOffSet;
         Color mTextColor;
+        Color mHoveredColor = DARKGRAY;
+        Color mToggledColor = GRAY;
         int mTextSize;
         public string Text { get { return mText; } set { mText = value; } }
 
@@ -76,7 +81,7 @@ namespace Flags_csharp.src.renders
         {
             mPos = pos;
             mSize = size;
-            mTexture.Add(texture);
+            mTexture = texture;
             mType = type;
             mShown = show;
         }
@@ -87,43 +92,47 @@ namespace Flags_csharp.src.renders
             mTextSize = size;
             mTextColor = color;
         }
-        public new void Draw()
+        public override void Draw()
         {
-            DrawTexturePro(mTexture[0], new Rectangle(0, 0, mTexture[0].width, mTexture[0].height), new Rectangle((int)mPos.X, (int)mPos.Y, mSize.X, mSize.Y), new Vector2(), 0, isOn ? DARKGRAY :  IsMouseOn() ? GRAY : WHITE);
+            if (!Visible)
+                return;
+            DrawTexturePro(mTexture, new Rectangle(0, 0, mTexture.width, mTexture.height), new Rectangle((int)mPos.X, (int)mPos.Y, mSize.X, mSize.Y), new Vector2(), 0, mToggled ? mToggledColor : IsMouseOn() ? mHoveredColor : mColor);
             if (mType == ButtonType.Text || mType == ButtonType.ToggleText)
                 DrawText(mText, (int)(mPos.X + mTextOffSet.X), (int)(mPos.Y + mTextOffSet.Y), mTextSize, mTextColor);
         }
-        public void Update()
+        public override void Update()
         {
+            if (!Visible)
+                return;
             switch (mType)
             {
                 case ButtonType.Toggle:
                 case ButtonType.ToggleText:
                     {
                         if (IsClicked())
-                            isOn = !isOn;
+                            mToggled = !mToggled;
                     }
                     break;
                 case ButtonType.Text:
                 case ButtonType.Basic:
                     {
-                        isOn = false;
+                        mToggled = false;
                         if (IsClicked())
-                            isOn = true;
+                            mToggled = true;
                     }
                     break;
                 default:
                     break;
             }
         }
-        public bool IsClicked()
+        public override bool IsClicked()
         {
             if (IsMouseOn() && IsMouseButtonReleased(MouseButton.MOUSE_LEFT_BUTTON))
                 return true;
             else
                 return false;
         }
-        public bool IsMouseOn()
+        public override bool IsMouseOn()
         {
             Rectangle rec = new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y);
             if (CheckCollisionPointRec(GetMousePosition(), rec))
@@ -131,47 +140,52 @@ namespace Flags_csharp.src.renders
             else
                 return false;
         }
-        public void setState(bool state) { isOn = state; }
+        public void SetState(bool state) { mToggled = state; }
+
+        public Color HoveredColor { get { return mHoveredColor; } set { mHoveredColor = value; } }
+        public Color ToggledColor { get { return mToggledColor; } set { mToggledColor = value; } }
     }
 
     // --------- Button ----------- //
     class Button : Sprite
     {
         protected float mRoundness = 0;
-        protected Color mColorWhenMouseOn;
+        protected Color mHoveredColor;
 
         public Button() { }
-        public Button(bool shown, Vector2 pos, Vector2 size, float roundness, Color color, Color colorWhenMouseOn, Texture2D texture = new Texture2D())
+        public Button(bool shown, Vector2 pos, Vector2 size, float roundness, Color color, Color hoverdColor, Texture2D texture = new Texture2D())
         {
             mShown = shown;
             mPos = pos;
             mSize = size;
             mRoundness = roundness;
             mColor = color;
-            mColorWhenMouseOn = colorWhenMouseOn;
-            mTexture.Add(texture);
+            mHoveredColor = hoverdColor;
+            mTexture = texture;
         }
         ~Button() { }
-        public new virtual void Draw()
+        public override void Draw()
         {
-            Color clickedColor = new Color(mColorWhenMouseOn.r, mColorWhenMouseOn.g, mColorWhenMouseOn.b, (mColorWhenMouseOn.a - 100));
+            if (!Visible)
+                return;
+            Color clickedColor = new Color(mHoveredColor.r, mHoveredColor.g, mHoveredColor.b, (mHoveredColor.a - 100));
             if (IsMouseOn())
             {
-                DrawRectangleRounded(new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y), mRoundness, 1, IsClicked() ? clickedColor : mColorWhenMouseOn);
+                DrawRectangleRounded(new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y), mRoundness, 1, IsClicked() ? clickedColor : mHoveredColor);
             }
             else
                 DrawRectangleRounded(new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y), mRoundness, 1, mColor);
         }
-        public virtual void Update() { }
+        public override void Update() { }
 
-        public bool IsClicked()
+        public override bool IsClicked()
         {
             if (IsMouseOn() && IsMouseButtonReleased(MouseButton.MOUSE_LEFT_BUTTON))
                 return true;
             else
                 return false;
         }
-        public bool IsMouseOn()
+        public override bool IsMouseOn()
         {
             Rectangle rec = new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y);
             if (CheckCollisionPointRec(GetMousePosition(), rec))
@@ -179,55 +193,61 @@ namespace Flags_csharp.src.renders
             else
                 return false;
         }
-        public float GetRoundness() { return mRoundness; }
-        public Color GetColorWhenMouseOn() { return mColorWhenMouseOn; }
+
+        public Color HoveredColor { get { return mHoveredColor; } set { mHoveredColor = value; } }
+        public float Roundness { get { return mRoundness; } set { mRoundness = value; } }
     };
-
-
 
     // -----------Toggle Button ----------- //
     class ToggleButton : Button
     {
-        bool mOn;
+        bool mToggle;
+        Color mToggledColor;
         public ToggleButton() { }
-        public ToggleButton(Button btn, bool On)
+        public ToggleButton(Button btn, bool toggle)
         {
-            mShown = btn.GetVisibility();
-            mPos = btn.GetPos();
-            mSize = btn.GetSize();
-            mRoundness = btn.GetRoundness();
-            mColor = btn.GetColor();
-            mColorWhenMouseOn = btn.GetColorWhenMouseOn();
-            mOn = On;
+            mShown = btn.Visible;
+            mPos = btn.Position;
+            mSize = btn.Size;
+            mRoundness = btn.Roundness;
+            mColor = btn.Color;
+            mHoveredColor = btn.HoveredColor;
+            mToggle = toggle;
+            mToggledColor = new Color(mHoveredColor.r, mHoveredColor.g, mHoveredColor.b, mHoveredColor.a - 100);
         }
-        ~ToggleButton() { }                    //
-        public new void Draw()
+        ~ToggleButton() { }
+        public override void Draw()
         {
-            Color clickedColor = new Color(mColorWhenMouseOn.r, mColorWhenMouseOn.g, mColorWhenMouseOn.b, mColorWhenMouseOn.a - 100);
+            if (!Visible)
+                return;
             if (IsMouseOn())
             {
-                DrawRectangleRounded(new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y), mRoundness, 1, IsOn() ? clickedColor : mColorWhenMouseOn);
+                DrawRectangleRounded(new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y), mRoundness, 1, IsToggle() ? mToggledColor : mHoveredColor);
             }
             else
                 DrawRectangleRounded(new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y), mRoundness, 1, mColor);
         }
-        public new void Update()
+        public override void Update()
         {
+            if (!Visible)
+                return;
             if (IsClicked())
             {
-                toggleState();
+                ToggleState();
             }
         }
-        public void toggleState() { mOn = !mOn; }
-        public void SetState(bool on) { mOn = on; }
-        public bool IsOn()
+        public void ToggleState() { mToggle = !mToggle; }
+        public void SetState(bool toggle) { mToggle = toggle; }
+        public bool IsToggle()
         {
-            return mOn;
+            return mToggle;
         }
+
+        public Color ToggledColor { get { return mToggledColor; } set { mToggledColor = value; } }
     }
 
-
-    class Text
+    // --------- Text ------------ //
+    class Text : UIComponent
     {
         protected Vector2 mTextPos;
         protected string mText;
@@ -249,22 +269,19 @@ namespace Flags_csharp.src.renders
             mTextFont = GetFontDefault();
         }
         ~Text() { }
-        public void Draw()
+        public override void Draw()
         {
+            if (!TextVisibility)
+                return;
             DrawTextEx(mTextFont, mText, mTextPos, mTextSize, mTextSpacing, mTextColor);
         }
-        public void SetText(string text) { mText = text; }
-        public void SetTextVisibility(bool shown) { mTextShown = shown; }
-        public void SetTextColor(Color textColor) { mTextColor = textColor; }
-        public void SetTextPos(Vector2 textPos) { mTextPos = textPos; }
-
-        public Vector2 GetTextPos() { return mTextPos; }
-        public string GetText() { return mText; }
-        public float GetTextSize() { return mTextSize; }
-        public Color GetTextColor() { return mTextColor; }
-        public bool GetTextVisibility() { return mTextShown; }
-        public Font GetTextFont() { return mTextFont; }
-        public float GetTextSpacing() { return mTextSpacing; }
+        public string Content { get { return mText; } set { mText = value; } }
+        public bool TextVisibility { get { return mTextShown; } set { mTextShown = value; } }
+        public Color TextColor { get { return mTextColor; } set { mTextColor = value; } }
+        public Vector2 TextPosition { get { return mTextPos; } set { mTextPos = value; } }
+        public float TextSize { get { return mTextSize; } set { mTextSize = value; } }
+        public float TextSpacing { get { return mTextSpacing; } set { mTextSpacing = value; } }
+        public Font TextFont { get { return mTextFont; } set { mTextFont = value; } }
     };
 
     // --------- Text Button ------------ //
@@ -288,10 +305,11 @@ namespace Flags_csharp.src.renders
             mSize = size;
             mRoundness = roundness;
             mColor = color;
-            mColorWhenMouseOn = colorWhenMouseOn;
+            mHoveredColor = colorWhenMouseOn;
             mTextOffSet = TextOffSet;
             mTextSize = textSize;
             mText = text;
+            mTextPos = textPos;
             mTextColor = color;
             mTextShown = shown;
             mTextFont = font;
@@ -304,24 +322,25 @@ namespace Flags_csharp.src.renders
             mSize = size;
             mRoundness = roundness;
             mColor = color;
-            mColorWhenMouseOn = colorWhenMouseOn;
+            mHoveredColor = colorWhenMouseOn;
             mTextOffSet = TextOffSet;
-            mTextSize = text.GetTextSize();
-            mText = text.GetText();
-            mTextColor = text.GetTextColor();
-            mTextShown = text.GetTextVisibility();
-            mTextFont = text.GetTextFont();
-            mTextSpacing = text.GetTextSpacing();
+            mTextSize = text.TextSize;
+            mText = text.Content;
+            mTextPos = text.TextPosition;
+            mTextColor = text.TextColor;
+            mTextShown = text.TextVisibility;
+            mTextFont = text.TextFont;
+            mTextSpacing = text.TextSpacing;
         }
         public TextButton(Button btn, Vector2 TextOffSet, string text, Vector2 pos, float size, Color color,
                bool shown = true, float rotation = 0, float spacing = 1, Font font = new Font())
         {
-            mShown = btn.GetVisibility();
-            mPos = btn.GetPos();
-            mSize = btn.GetSize();
-            mRoundness = btn.GetRoundness();
-            mColor = btn.GetColor();
-            mColorWhenMouseOn = btn.GetColorWhenMouseOn();
+            mShown = btn.Visible;
+            mPos = btn.Position;
+            mSize = btn.Size;
+            mRoundness = btn.Roundness;
+            mColor = btn.Color;
+            mHoveredColor = btn.HoveredColor;
             mTextOffSet = TextOffSet;
             mTextSize = size;
             mText = text;
@@ -335,25 +354,25 @@ namespace Flags_csharp.src.renders
             mPos = pos;
             mSize = size;
             mColor = color;
-            mColorWhenMouseOn = new Color((color.r - 20), (color.g - 20), (color.b - 20), color.a);
+            mHoveredColor = new Color((color.r - 20), (color.g - 20), (color.b - 20), color.a);
             mTextOffSet = textOffSet;
             mText = text;
             mTextColor = textColor;
             mTextSize = textSize;
         }
         ~TextButton() { }
-        public new void Draw()
+        public override void Draw()
         {
-            Color clickedColor = new Color(mColorWhenMouseOn.r, mColorWhenMouseOn.g, mColorWhenMouseOn.b, (mColorWhenMouseOn.a - 100));
+            if (!Visible)
+                return;
             if (IsMouseOn())
             {
-                DrawRectangleRounded(new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y), mRoundness, 1, IsClicked() ? clickedColor : mColorWhenMouseOn);
+                DrawRectangleRounded(new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y), mRoundness, 1, mHoveredColor);
             }
             else
                 DrawRectangleRounded(new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y), mRoundness, 1, mColor);
             DrawTextEx(mTextFont, mText, (mPos + mTextOffSet), mTextSize, mTextSpacing, mTextColor);
         }
-        public new void Update() { }
         public void SetTextSize(int textSize) { mTextSize = textSize; }
         public void SetTextOffSet(Vector2 textOffSet) { mTextOffSet = textOffSet; }
         public void SetTextColor(Color textColor) { mTextColor = textColor; }
@@ -364,7 +383,6 @@ namespace Flags_csharp.src.renders
         public Color GetTextColor() { return mTextColor; }
         public string GetText() { return mText; }
     };
-
 
     // ------------ Input Box ------------- //
     class InputBox : Sprite
@@ -393,8 +411,11 @@ namespace Flags_csharp.src.renders
             mFont = GetFontDefault();
         }
         ~InputBox() { }
-        public void Update()
+
+        public override void Update()
         {
+            if (!Visible)
+                return;
             ++mFrameCounter;
             if (IsClicked())
                 clicked = true;
@@ -424,8 +445,10 @@ namespace Flags_csharp.src.renders
                 }
             }
         }
-        public new void Draw()
+        public override void Draw()
         {
+            if (!Visible)
+                return;
             DrawRectangle((int)mPos.X, (int)mPos.Y, (int)mSize.X, (int)mSize.Y, mColor);
             DrawRectangleLines((int)mPos.X, (int)mPos.Y, (int)mSize.X, (int)mSize.Y, clicked ? RED : BLACK);
             DrawTextEx(mFont, mText, new Vector2((float)mPos.X + 5, (float)mPos.Y + 5), mTextSize, 1, BLACK);
@@ -436,7 +459,7 @@ namespace Flags_csharp.src.renders
                     DrawText("|", (int)mPos.X + 8 + MeasureText(mText, mTextSize - 5), (int)mPos.Y + 12, mTextSize, MAROON);
             }
         }
-        public bool IsMouseOn()
+        public override bool IsMouseOn()
         {
             Rectangle rec = new Rectangle((float)mPos.X, (float)mPos.Y, (float)mSize.X, (float)mSize.Y);
             if (CheckCollisionPointRec(GetMousePosition(), rec) && mShown)
@@ -450,7 +473,7 @@ namespace Flags_csharp.src.renders
                 return false;
             }
         }
-        public bool IsClicked()
+        public override bool IsClicked()
         {
             if (IsMouseOn() && IsMouseButtonPressed(MouseButton.MOUSE_LEFT_BUTTON))
                 return true;

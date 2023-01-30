@@ -10,7 +10,6 @@ namespace Flags_csharp.src.renders
 {
     class Ressource
     {
-        public List<Texture2D> flags;
         public Dictionary<string,Texture2D> UITextures = new Dictionary<string, Texture2D>();
         public Ressource()
         {
