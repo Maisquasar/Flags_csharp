@@ -30,8 +30,8 @@ namespace Flags_csharp.src.datas
         }
 
         public static List<Countries> countriesDatas = new List<Countries>(){
-                new Countries("Afghanistan", "Kaboul", "Asie", "af"),
-                new Countries("Afrique du Sud", "Pretoria", "Afrique", "za"),
+                new Countries("Afghanistan"                      , "Kaboul"              , "Asie"    , "af"),
+                new Countries("Afrique du Sud"                   , "Pretoria"            , "Afrique" , "za"),
                 new Countries("Albanie"                          , "Tirana"              , "Europe"  , "al"),
                 new Countries("Algerie"                          , "Alger"               , "Afrique" , "dz"),
                 new Countries("Allemagne"                        , "Berlin"              , "Europe"  , "de"),

@@ -180,6 +180,8 @@ namespace Flags_csharp.src.renders
 
         public override bool IsClicked()
         {
+            if (!Visible)
+                return false;
             if (IsMouseOn() && IsMouseButtonReleased(MouseButton.MOUSE_LEFT_BUTTON))
                 return true;
             else
@@ -271,12 +273,12 @@ namespace Flags_csharp.src.renders
         ~Text() { }
         public override void Draw()
         {
-            if (!TextVisibility)
+            if (!Visible)
                 return;
             DrawTextEx(mTextFont, mText, mTextPos, mTextSize, mTextSpacing, mTextColor);
         }
         public string Content { get { return mText; } set { mText = value; } }
-        public bool TextVisibility { get { return mTextShown; } set { mTextShown = value; } }
+        public override bool Visible { get { return mTextShown; } set { mTextShown = value; } }
         public Color TextColor { get { return mTextColor; } set { mTextColor = value; } }
         public Vector2 TextPosition { get { return mTextPos; } set { mTextPos = value; } }
         public float TextSize { get { return mTextSize; } set { mTextSize = value; } }
@@ -328,7 +330,7 @@ namespace Flags_csharp.src.renders
             mText = text.Content;
             mTextPos = text.TextPosition;
             mTextColor = text.TextColor;
-            mTextShown = text.TextVisibility;
+            mTextShown = text.Visible;
             mTextFont = text.TextFont;
             mTextSpacing = text.TextSpacing;
         }
@@ -410,7 +412,10 @@ namespace Flags_csharp.src.renders
             mText = "";
             mFont = GetFontDefault();
         }
-        ~InputBox() { }
+        ~InputBox() 
+        {
+            SetMouseCursor(MouseCursor.MOUSE_CURSOR_DEFAULT);
+        }
 
         public override void Update()
         {

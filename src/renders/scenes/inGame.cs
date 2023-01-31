@@ -143,7 +143,10 @@ namespace Flags_csharp.src.renders.scenes
 
             UiComponents["input"].Visible = true;
             UiComponents["Pause"].Visible = true;
-            UiComponents["Title"].Visible = true;
+
+            UiComponents["Title"].Visible = false;
+            UiComponents["back"].Visible = false;
+
         }
 
         public new void Update()
@@ -208,11 +211,11 @@ namespace Flags_csharp.src.renders.scenes
             }
             if (mMode != GameMode.NONE && mMode2 != GameMode2.NONE)
             {
-                UiComponents["Title"].Visible = (false);
+                UiComponents["Title"].Visible = false;
             }
             else
             {
-                UiComponents["Title"].Visible = (true);
+                UiComponents["Title"].Visible = true;
             }
         }
 
@@ -296,10 +299,10 @@ namespace Flags_csharp.src.renders.scenes
             if (IsKeyReleased(KeyboardKey.KEY_ENTER))
             {
                 (UiComponents["input"] as InputBox).SetClicked(true);
-                (UiComponents["AnswerStatus"] as Text).TextVisibility = (true);
+                (UiComponents["AnswerStatus"] as Text).Visible = true;
                 frameCount = 60;
                 // If 75% of the characters are good then it's valid.
-                if (IsValid((UiComponents["input"] as InputBox).GetText(), countries[mRandomId].GetCountryName(), 75) && frameCount > 0)
+                if (IsValid((UiComponents["input"] as InputBox).GetText(), (UiComponents["AnswerText"] as Text).Content, 75) && frameCount > 0)
                 {
                     (UiComponents["AnswerStatus"] as Text).Content = "Good result";
                     (UiComponents["AnswerStatus"] as Text).TextColor = (GREEN);
@@ -323,9 +326,9 @@ namespace Flags_csharp.src.renders.scenes
 
             // Answer Button.
             if ((UiComponents["Answer"] as ToggleButton).IsToggle())
-                (UiComponents["AnswerText"] as Text).TextVisibility = (true);
+                (UiComponents["AnswerText"] as Text).Visible = true;
             else
-                (UiComponents["AnswerText"] as Text).TextVisibility = (false);
+                (UiComponents["AnswerText"] as Text).Visible = false;
 
             // Check if all was found, if true win.
             if (countries.Count() <= 0)
@@ -339,7 +342,7 @@ namespace Flags_csharp.src.renders.scenes
             // Set Visibility to false when time is elapsed.
             if (frameCount <= 0)
             {
-                (UiComponents["AnswerStatus"] as Text).TextVisibility = (false);
+                (UiComponents["AnswerStatus"] as Text).Visible = (false);
                 frameCount = 0;
             }
 
