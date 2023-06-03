@@ -94,8 +94,6 @@ namespace Flags_csharp.src.renders.scenes
 
             // Answer Button.
             UiComponents["Answer"] = new ToggleButton(new Button(true, new Vector2(200, GetScreenHeight() - 100), new Vector2(50, 50), 0, SKYBLUE, PINK), false);
-
-            foreach (var i in UiComponents) { Console.WriteLine($"{ i.Key} : {i.Value.ToString()}"); }
         }
         ~InGame() { }
 

@@ -27,6 +27,7 @@ namespace Flags_csharp.src.renders
         public SceneManager()
         {
             mainMenu = new MainMenu(ressource);
+            pauseMenu = new Pause(ressource);
         }
         ~SceneManager() { }
         public void SwitchTo(SceneTypes type) 
